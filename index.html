@@ -148,7 +148,14 @@
   <script>
     let usuarioActual = "";
 
-    document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+    // Función para setear la fecha de hoy con la zona horaria local correcta
+    function setFechaActual() {
+      let tzoffset = (new Date()).getTimezoneOffset() * 60000;
+      document.getElementById('fecha').value = new Date(Date.now() - tzoffset).toISOString().split('T')[0];
+    }
+
+    // Inicializa la fecha al cargar la página
+    setFechaActual();
 
     if(localStorage.getItem('usuarioHogar')) {
       iniciarApp(localStorage.getItem('usuarioHogar'));
@@ -170,7 +177,7 @@
       document.getElementById('pantalla-form').classList.add('oculto');
       document.getElementById('pantalla-login').classList.remove('oculto');
       document.getElementById('formulario').reset();
-      document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+      setFechaActual();
     }
 
     function resetearPredeterminados() {
@@ -229,7 +236,10 @@
       e.preventDefault();
       
       const fechaRaw = document.getElementById('fecha').value; 
-      const baseDate = new Date(fechaRaw + "T00:00:00"); 
+      const [year, month, day] = fechaRaw.split('-');
+      // Creamos la base de la fecha usando la zona horaria local de forma segura
+      const baseDate = new Date(year, month - 1, day); 
+      
       const tipo = document.getElementById('tipo-mov').value;
       const metodo = document.getElementById('metodo').value;
       const monto = document.getElementById('monto').value;
@@ -253,13 +263,15 @@
         let dd = String(fechaCuota.getDate()).padStart(2, '0');
         let mm = String(fechaCuota.getMonth() + 1).padStart(2, '0');
         let yyyy = fechaCuota.getFullYear();
-        let fechaFormateada = `${dd}/${mm}/${yyyy}`;
+        
+        // FORMATO ESTADOS UNIDOS: Mes / Día / Año (MM/DD/YYYY)
+        let fechaFormateada = `${mm}/${dd}/${yyyy}`;
         
         let notaFinal = notasBase;
         if (cuotas > 1) {
           let strI = String(i).padStart(2, '0');
           let strTotal = String(cuotas).padStart(2, '0');
-          notaFinal = notaFinal + ` - cuota ${strI}/${strTotal}`;
+          notaFinal = notaFinal + (notaFinal ? " " : "") + `- cuota ${strI}/${strTotal}`;
         }
         
         envios.push({
@@ -304,7 +316,7 @@
         }, 5000);
 
         document.getElementById('formulario').reset();
-        document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+        setFechaActual();
         document.getElementById('cuotas').value = 1;
         resetearPredeterminados();
       })
