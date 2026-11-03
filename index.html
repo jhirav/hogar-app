@@ -256,7 +256,7 @@
 
       let envios = [];
 
-for (let i = 1; i <= cuotas; i++) {
+      for (let i = 1; i <= cuotas; i++) {
         let fechaCuota = new Date(baseDate);
         fechaCuota.setMonth(fechaCuota.getMonth() + (i - 1));
         
@@ -264,9 +264,8 @@ for (let i = 1; i <= cuotas; i++) {
         let mm = String(fechaCuota.getMonth() + 1).padStart(2, '0');
         let yyyy = fechaCuota.getFullYear();
         
-        // FORMATO UNIVERSAL ESTÁNDAR: Año-Mes-Día (YYYY-MM-DD)
-        // Sheets siempre lo interpreta correctamente sin importar su configuración regional.
-        let fechaFormateada = `${yyyy}-${mm}-${dd}`;
+        // FORMATO ESTADOS UNIDOS: Mes / Día / Año (MM/DD/YYYY)
+        let fechaFormateada = `${mm}/${dd}/${yyyy}`;
         
         let notaFinal = notasBase;
         if (cuotas > 1) {
