@@ -1,3 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Movimientos Hogar</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; }
+    .pantalla { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+    .oculto { display: none; }
+    button { width: 100%; padding: 15px; margin: 10px 0; background: #4285f4; color: white; border: none; border-radius: 5px; font-size: 16px; }
+    button.secundario { background: #34a853; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; }
+    .fila-monto { display: flex; gap: 10px; }
+    .btn-pegar { width: 30%; background: #fbbc05; padding: 10px; margin-top: 5px; color: black; font-weight: bold;}
+    #mensaje-exito { background-color: #d4edda; color: #155724; padding: 12px; border-radius: 5px; margin-bottom: 15px; text-align: center; font-weight: bold; border: 1px solid #c3e6cb; }
+  </style>
+</head>
+<body>
+
+  <!-- PANTALLA 1: ELECCIÓN DE USUARIO -->
+  <div id="pantalla-login" class="pantalla">
+    <h2>¿Quién está registrando?</h2>
+    <button onclick="iniciarApp('Juan')">Soy Juan</button>
+    <button onclick="iniciarApp('Juli')">Soy Juli</button>
+  </div>
+
+  <!-- PANTALLA 2: FORMULARIO ÚNICO -->
+  <div id="pantalla-form" class="pantalla oculto">
+    <h2 id="saludo">Registro</h2>
+    
+    <!-- Contenedor del mensaje de éxito -->
+    <div id="mensaje-exito" class="oculto"></div>
+
+    <form id="formulario">
+      
+      <label>Fecha de pago</label>
+      <input type="date" id="fecha" required>
+
+      <label>Monto</label>
+      <div class="fila-monto">
+        <input type="text" inputmode="decimal" id="monto" required placeholder="Ej: 1500.50" 
+               oninput="this.value = this.value.replace(/,/g, '.').replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
+        <button type="button" class="btn-pegar" onclick="pegarMonto()">Pegar</button>
+      </div>
+
+      <label>Tipo de movimiento</label>
+      <select id="tipo-mov" onchange="actualizarSecciones()">
+        <option value="Gastos">Gastos</option>
+        <option value="Facturas mensuales">Facturas mensuales</option>
+        <option value="Ingresos">Ingresos</option>
+      </select>
+
+      <label>Método de pago/acreditación</label>
+      <select id="metodo" onchange="verificarMetodo()">
+        <option value="VISA Juan">VISA Juan</option>
+        <option value="VISA Juli">VISA Juli</option>
+        <option value="Fondos comunes">Fondos comunes</option>
+        <option value="MASTER Mercado">MASTER Mercado</option>
+      </select>
+
+      <!-- CAMPO DE CUOTAS OCULTO -->
+      <div id="sec-cuotas" class="oculto">
+        <label>Cantidad de cuotas</label>
+        <input type="number" id="cuotas" min="1" value="1" step="1">
+      </div>
+
+      <!-- SECCIÓN DINÁMICA: GASTOS -->
+      <div id="sec-gastos">
+        <label>Subcategoría</label>
+        <select id="subcategoria">
+          <option value="🍲 Comida">🍲 Comida</option>
+          <option value="🏠 Hogar">🏠 Hogar</option>
+          <option value="🚍 Transportes">🚍 Transportes</option>
+          <option value="🥂 Restaurantes">🥂 Restaurantes</option>
+          <option value="👕 Ropa">👕 Ropa</option>
+          <option value="💊 Salud">💊 Salud</option>
+          <option value="🔐 Seguros">🔐 Seguros</option>
+          <option value="📦 Suministros">📦 Suministros</option>
+          <option value="🧍 Personal">🧍 Personal</option>
+          <option value="💰 Deudas">💰 Deudas</option>
+          <option value="📕 Educación">📕 Educación</option>
+          <option value="⚠️ Fondo emergencia">⚠️ Fondo emergencia</option>
+          <option value="🎁 Donaciones">🎁 Donaciones</option>
+          <option value="🤑 Ahorros">🤑 Ahorros</option>
+          <option value="🥳 Entretenimiento">🥳 Entretenimiento</option>
+          <option value="💾 Trabajo Juli">💾 Trabajo Juli</option>
+          <option value="💾 Trabajo Juan">💾 Trabajo Juan</option>
+          <option value="💳 Pago tarjeta">💳 Pago tarjeta</option>
+          <option value="➖ Ajuste negativo">➖ Ajuste negativo</option>
+          <option value="💝 Regalos">💝 Regalos</option>
+          <option value="➕ Ajuste positivo">➕ Ajuste positivo</option>
+          <option value="📞 Celu Juan">📞 Celu Juan</option>
+        </select>
+      </div>
+
+      <!-- SECCIÓN DINÁMICA: FACTURAS -->
+      <div id="sec-facturas" class="oculto">
+        <label>Tipo de factura mensual</label>
+        <select id="factura">
+          <option value="🏠 Alquiler">🏠 Alquiler</option>
+          <option value="🏦 Monotributo Juan">🏦 Monotributo Juan</option>
+          <option value="🎁 Capital del Señor">🎁 Capital del Señor</option>
+          <option value="💊 Psico Juli">💊 Psico Juli</option>
+          <option value="🏦 Monotributo Juli">🏦 Monotributo Juli</option>
+          <option value="💪 Gimnasio Juli">💪 Gimnasio Juli</option>
+          <option value="📺 YouTube">📺 YouTube</option>
+          <option value="📞 Internet hogar">📞 Internet hogar</option>
+          <option value="🏠 Alarma">🏠 Alarma</option>
+          <option value="💊 Prepaga Juli">💊 Prepaga Juli</option>
+          <option value="🏠 Seguro">🏠 Seguro</option>
+          <option value="📞 Celu Juli">📞 Celu Juli</option>
+          <option value="📞 Celu Juan">📞 Celu Juan</option>
+          <option value="💧 Agua">💧 Agua</option>
+          <option value="⚡ Luz">⚡ Luz</option>
+          <option value="⛽ Gas">⛽ Gas</option>
+          <option value="🏦 Imp. Municipal">🏦 Imp. Municipal</option>
+          <option value="💊 Prepaga Juan">💊 Prepaga Juan</option>
+          <option value="🏠 Expensas">🏠 Expensas</option>
+        </select>
+      </div>
+
+      <!-- SECCIÓN DINÁMICA: INGRESOS -->
+      <div id="sec-ingresos" class="oculto">
+        <label>Tipo de ingreso</label>
+        <select id="ingreso">
+          <option value="🅿️ Profecía">🅿️ Profecía</option>
+          <option value="Ⓜ️ MSQ">Ⓜ️ MSQ</option>
+          <option value="💸 Varios">💸 Varios</option>
+          <option value="💎 Promociones">💎 Promociones</option>
+          <option value="♻️ Devoluciones">♻️ Devoluciones</option>
+          <option value="🔁 Dev. Deudas">🔁 Dev. Deudas</option>
+          <option value="➕ Ajuste positivo">➕ Ajuste positivo</option>
+          <option value="💲 Inversiones">💲 Inversiones</option>
+          <option value="📚 Docencia">📚 Docencia</option>
+        </select>
+      </div>
+
+      <label>Notas (opcional)</label>
+      <input type="text" id="notas">
+
+      <button type="submit" class="secundario">Registrar Movimiento</button>
+      <button type="button" onclick="cambiarUsuario()" style="background:#ea4335;">Cambiar Usuario</button>
+    </form>
+  </div>
+
+  <script>
+    let usuarioActual = "";
+
+    // Función para setear la fecha de hoy con la zona horaria local correcta
+    function setFechaActual() {
+      let tzoffset = (new Date()).getTimezoneOffset() * 60000;
+      document.getElementById('fecha').value = new Date(Date.now() - tzoffset).toISOString().split('T')[0];
+    }
+
+    // Inicializa la fecha al cargar la página
+    setFechaActual();
+
+    if(localStorage.getItem('usuarioHogar')) {
+      iniciarApp(localStorage.getItem('usuarioHogar'));
+    }
+
+    function iniciarApp(nombre) {
+      usuarioActual = nombre;
+      localStorage.setItem('usuarioHogar', nombre);
+      
+      document.getElementById('pantalla-login').classList.add('oculto');
+      document.getElementById('pantalla-form').classList.remove('oculto');
+      document.getElementById('saludo').innerText = "Registro - " + nombre;
+
+      resetearPredeterminados();
+    }
+
+    function cambiarUsuario() {
+      localStorage.removeItem('usuarioHogar');
+      document.getElementById('pantalla-form').classList.add('oculto');
+      document.getElementById('pantalla-login').classList.remove('oculto');
+      document.getElementById('formulario').reset();
+      setFechaActual();
+    }
+
+    function resetearPredeterminados() {
+      document.getElementById('tipo-mov').value = "Gastos";
+      document.getElementById('metodo').value = "VISA " + usuarioActual;
+      document.getElementById('subcategoria').value = "🍲 Comida";
+      actualizarSecciones();
+      verificarMetodo();
+    }
+
+    function actualizarSecciones() {
+      const tipo = document.getElementById('tipo-mov').value;
+      
+      document.getElementById('sec-gastos').classList.add('oculto');
+      document.getElementById('sec-facturas').classList.add('oculto');
+      document.getElementById('sec-ingresos').classList.add('oculto');
+
+      if (tipo === "Gastos") {
+        document.getElementById('sec-gastos').classList.remove('oculto');
+        document.getElementById('subcategoria').value = "🍲 Comida";
+      } else if (tipo === "Facturas mensuales") {
+        document.getElementById('sec-facturas').classList.remove('oculto');
+        document.getElementById('factura').value = "🏠 Alquiler";
+      } else if (tipo === "Ingresos") {
+        document.getElementById('sec-ingresos').classList.remove('oculto');
+        document.getElementById('ingreso').value = "🅿️ Profecía";
+        document.getElementById('metodo').value = "Fondos comunes";
+      }
+      verificarMetodo();
+    }
+
+    function verificarMetodo() {
+      const metodo = document.getElementById('metodo').value;
+      const secCuotas = document.getElementById('sec-cuotas');
+      
+      if (metodo.includes('VISA') || metodo.includes('MASTER')) {
+        secCuotas.classList.remove('oculto');
+      } else {
+        secCuotas.classList.add('oculto');
+        document.getElementById('cuotas').value = 1;
+      }
+    }
+
+    async function pegarMonto() {
+      try {
+        const texto = await navigator.clipboard.readText();
+        let numLimpio = texto.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+        numLimpio = numLimpio.replace(/(\..*)\./g, '$1');
+        document.getElementById('monto').value = numLimpio;
+      } catch (err) {
+        alert("No se pudo acceder al portapapeles. Da permisos o pégalo manualmente.");
+      }
+    }
+
+    document.getElementById('formulario').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const fechaRaw = document.getElementById('fecha').value; 
+      const [year, month, day] = fechaRaw.split('-');
+      // Creamos la base de la fecha usando la zona horaria local de forma segura
+      const baseDate = new Date(year, month - 1, day); 
+      
+      const tipo = document.getElementById('tipo-mov').value;
+      const metodo = document.getElementById('metodo').value;
+      const monto = document.getElementById('monto').value;
+      const notasBase = document.getElementById('notas').value;
+
+      let cuotas = 1;
+      if (metodo.includes('VISA') || metodo.includes('MASTER')) {
+        cuotas = parseInt(document.getElementById('cuotas').value) || 1;
+      }
+      
+      let subcategoria = tipo === 'Gastos' ? document.getElementById('subcategoria').value : '';
+      let facturaMensual = tipo === 'Facturas mensuales' ? document.getElementById('factura').value : '';
+      let tipoIngreso = tipo === 'Ingresos' ? document.getElementById('ingreso').value : '';
+
+      let envios = [];
+
 for (let i = 1; i <= cuotas; i++) {
         let fechaCuota = new Date(baseDate);
         fechaCuota.setMonth(fechaCuota.getMonth() + (i - 1));
@@ -28,3 +286,46 @@ for (let i = 1; i <= cuotas; i++) {
           tipoIngreso: tipoIngreso
         });
       }
+
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7hBAe5DBudoW-LEnqJV6s1j9FqfYSWhSN4lNBsA90H84GVw3h_xgYjsu-R725u5enwQ/exec';
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(envios)
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Guardado en Google Sheets:", data);
+        
+        const msjBox = document.getElementById('mensaje-exito');
+        let detalleCategoria = "";
+        if (tipo === 'Gastos') detalleCategoria = subcategoria;
+        else if (tipo === 'Facturas mensuales') detalleCategoria = facturaMensual;
+        else if (tipo === 'Ingresos') detalleCategoria = tipoIngreso;
+
+        if (cuotas > 1) {
+          msjBox.innerText = `✅ Enviado: ${cuotas} cuotas de $${monto} en ${detalleCategoria}`;
+        } else {
+          msjBox.innerText = `✅ Enviado: $${monto} en ${detalleCategoria}`;
+        }
+        
+        msjBox.classList.remove('oculto');
+        
+        setTimeout(() => {
+          msjBox.classList.add('oculto');
+        }, 5000);
+
+        document.getElementById('formulario').reset();
+        setFechaActual();
+        document.getElementById('cuotas').value = 1;
+        resetearPredeterminados();
+      })
+      .catch(err => {
+        console.error("Error al registrar:", err);
+        alert("Hubo un error de conexión al guardar los datos.");
+      });
+    });
+  </script>
+</body>
+</html>
